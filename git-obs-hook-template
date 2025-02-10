@@ -12,9 +12,9 @@
 
 
 XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
-GIT_OBS_HOOKS_DEBUG="${GIT_OBS_HOOKS_DEBUG:0}"
-HOOK_NAME="$(basename $0)"
-HOOK_DIR="$(readlink -f $0).d"
+GIT_OBS_HOOKS_DEBUG="${GIT_OBS_HOOKS_DEBUG:-0}"
+HOOK_NAME="$(basename "$0")"
+HOOK_DIR="$(readlink -f "$0").d"
 HOME_HOOK_DIR="${XDG_DATA_HOME}/git-obs-hooks/${HOOK_NAME}"
 
 
