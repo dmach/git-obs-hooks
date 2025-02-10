@@ -37,15 +37,19 @@ debug_msg() {
 
 
 debug_msg "Running ${HOOK_NAME} hooks:"
-for hook in "${HOOK_DIR}"/*; do
-    debug_msg "  - Running ${hook}"
-    ${hook} "$@"
+for hook in "${HOOK_DIR}"/*.sh ; do
+    if [ -x "${hook}" ] ; then
+        debug_msg "  - Running ${hook}"
+        ${hook} "$@"
+    fi
 done
 
 
 if [ -d "${HOME_HOOK_DIR}" ]; then
-    for hook in "${HOME_HOOK_DIR}"/*; do
-        debug_msg "  - Running ${hook}"
-        ${hook} "$@"
+    for hook in "${HOME_HOOK_DIR}"/*.sh ; do
+        if [ -x "${hook}" ] ; then
+            debug_msg "  - Running ${hook}"
+            ${hook} "$@"
+        fi
     done
 fi
