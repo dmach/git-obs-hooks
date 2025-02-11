@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # Framework for running git hooks in git-obs and osc
 #
 # To install the hooks on the system, place executables under:
@@ -14,8 +13,8 @@
 XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
 GIT_OBS_HOOKS_DEBUG="${GIT_OBS_HOOKS_DEBUG:-0}"
 HOOK_NAME="$(basename "$0")"
-HOOK_DIR="$(readlink -f "$0").d"
-HOME_HOOK_DIR="${XDG_DATA_HOME}/git-obs-hooks/${HOOK_NAME}"
+HOOK_DIR="$(realpath -s "$0").d"
+HOME_HOOK_DIR="${XDG_DATA_HOME}/git-obs-hooks/${HOOK_NAME}.d"
 
 
 trap_exit() {
@@ -35,21 +34,19 @@ debug_msg() {
     echo "$@" >&1
 }
 
-
 debug_msg "Running ${HOOK_NAME} hooks:"
-for hook in "${HOOK_DIR}"/*.sh ; do
-    if [ -x "${hook}" ] ; then
-        debug_msg "  - Running ${hook}"
-        ${hook} "$@"
-    fi
-done
-
+if [ -d "${HOOK_DIR}" ]; then
+    find "${HOOK_DIR}" -name \*.sh -perm -111 \
+        | while read -r hook ; do
+           debug_msg "  - Running ${hook}"
+           ${hook} "$@"
+        done
+fi
 
 if [ -d "${HOME_HOOK_DIR}" ]; then
-    for hook in "${HOME_HOOK_DIR}"/*.sh ; do
-        if [ -x "${hook}" ] ; then
-            debug_msg "  - Running ${hook}"
-            ${hook} "$@"
-        fi
-    done
+    find "${HOME_HOOK_DIR}" -name \*.sh -perm -111 \
+        | while read -r hook ; do
+           debug_msg "  - Running ${hook}"
+           ${hook} "$@"
+        done
 fi
