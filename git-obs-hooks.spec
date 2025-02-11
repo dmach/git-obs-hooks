@@ -1,3 +1,4 @@
+%define hook_dir %{_datadir}/git-obs-hooks
 Name:           git-obs-hooks
 Version:        0.1.0
 Release:        0
@@ -6,12 +7,8 @@ License:        GPL-2.0-or-later
 Group:          Development/Tools/Other
 URL:            https://github.com/dmach/git-obs-hooks
 Source:         https://github.com/dmach/git-obs-hooks/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-
 BuildRequires:  fdupes
 BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-
-%define hook_dir %{_datadir}/git-obs-hooks
 
 %description
 Framework for running git hooks in git-obs and osc.
@@ -24,8 +21,8 @@ To enable git-obs-hooks in the current git repo, run: install-git-obs-hooks
 See githooks(5) man page for more help on the hooks.
 
 %package script-convert-changes
-Summary: working script for %{name} converting last record of *.changes to git commit
-Requires: %{name} = %{version}
+Summary:        working script for %{name} converting last record of *.changes to git commit
+Requires:       %{name} = %{version}
 
 %description script-convert-changes
 Working script for %{name}, which causes `git commit` to generate
@@ -90,7 +87,6 @@ done
 %fdupes %{buildroot}%{hook_dir}
 
 %files
-%defattr(-,root,root,-)
 %attr(0755, root, root) %{_bindir}/install-git-obs-hooks
 %dir %{hook_dir}
 %dir %{hook_dir}/*.d
