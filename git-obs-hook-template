@@ -1,52 +1,40 @@
 #!/bin/sh
-
 # Framework for running git hooks in git-obs and osc
 #
 # To install the hooks on the system, place executables under:
+#  - /usr/local/share/git-obs-hooks/<git-hook>.d/<filename>
 #  - /usr/share/git-obs-hooks/<git-hook>.d/<filename>
 #  - ~/.local/share/git-obs-hooks/<git-hook>.d/<filename>
 # To enable git-obs-hooks in the current git repo, run: install-git-obs-hooks
 #
 # See githooks(5) man page for more help on the hooks.
+set -eu
 
+XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+GIT_OBS_HOOKS_DEBUG=${GIT_OBS_HOOKS_DEBUG:-${GIT_TRACE:-0}}
 
-XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
-GIT_OBS_HOOKS_DEBUG="${GIT_OBS_HOOKS_DEBUG:-0}"
-HOOK_NAME="$(basename "$0")"
-HOOK_DIR="$(realpath -s "$0").d"
-HOME_HOOK_DIR="${XDG_DATA_HOME}/git-obs-hooks/${HOOK_NAME}.d"
+hook_name=${0##*/}
 
-
-trap_exit() {
-    exit_code=$?
-    if [ ${exit_code} -ne 0 ]; then
-        echo "ERROR: ${HOOK_NAME} hook '${hook}' failed with exit code ${exit_code}"
-    fi
-    exit $exit_code
+die() {
+  exit_code=$?
+  printf >&2 '%s\n' "$1"
+  exit "$exit_code"
 }
-trap "trap_exit" EXIT
-
 
 debug_msg() {
-    if [ "${GIT_OBS_HOOKS_DEBUG}" != "1" ]; then
-        return
-    fi
-    echo "$@" >&1
+  if [ "$GIT_OBS_HOOKS_DEBUG" = 1 ]; then
+    printf >&2 '%s\n' "$1"
+  fi
 }
 
-debug_msg "Running ${HOOK_NAME} hooks:"
-if [ -d "${HOOK_DIR}" ]; then
-    find "${HOOK_DIR}" -name \*.sh -perm -111 \
-        | while read -r hook ; do
-           debug_msg "  - Running ${hook}"
-           ${hook} "$@"
-        done
-fi
-
-if [ -d "${HOME_HOOK_DIR}" ]; then
-    find "${HOME_HOOK_DIR}" -name \*.sh -perm -111 \
-        | while read -r hook ; do
-           debug_msg "  - Running ${hook}"
-           ${hook} "$@"
-        done
-fi
+debug_msg "Running $hook_name hooks:"
+for hook in \
+    "$XDG_DATA_HOME/git-obs-hooks/$hook_name.d"/* \
+    "/usr/local/share/git-obs-hooks/$hook_name.d"/* \
+    "/usr/share/git-obs-hooks/$hook_name.d"/*
+do
+  if [ -f "$hook" ] && [ -x "$hook" ] ; then
+    debug_msg "  - Running $hook"
+    "$hook" "$@" || die "ERROR: '$hook' failed with exit status $?"
+  fi
+done

@@ -2,11 +2,11 @@
 
 
 GIT_TOPDIR=$(git rev-parse --show-toplevel 2>/dev/null)
+# shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
     echo "ERROR: Couldn't determine git top directory"
     exit 1
 fi
-
 
 debug_msg() {
     if [ "${GIT_OBS_HOOKS_DEBUG}" != "1" ]; then
@@ -20,11 +20,11 @@ HOOKS_TOPDIR="/usr/share/git-obs-hooks"
 
 
 for hook_path in "${HOOKS_TOPDIR}"/*; do
-    if [ ! -x "${hook_path}" -o -d "${hook_path}" ]; then
+    if [ ! -x "${hook_path}" ] || [ -d "${hook_path}" ]; then
         continue
     fi
 
-    hook_name=$(basename ${hook_path})
+    hook_name=$(basename "${hook_path}")
     git_hook_path="${GIT_TOPDIR}/.git/hooks/${hook_name}"
     debug_msg "Installing hook ${hook_path} -> ${git_hook_path}"
     ln -s --no-target-directory "${hook_path}" "${git_hook_path}"
